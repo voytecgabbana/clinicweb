@@ -1,0 +1,555 @@
+{% extends "base_admin.html" %}
+{% block title %}Panel lekarza{% endblock %}
+
+{% block content %}
+
+<h1 class="h3 mb-4 text-gray-800">Panel lekarza</h1>
+
+{# ===================== NAJBLIŻSZA WIZYTA ===================== #}
+{% if next_appointment %}
+<div class="card shadow mb-4 border-left-primary">
+  <div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary">Najbliższa wizyta</h6>
+
+    {% if next_appointment['status'] == 'done' %}
+      <span class="badge badge-success">zrealizowana</span>
+    {% elif next_appointment['status'] == 'no_show' %}
+      <span class="badge badge-danger">niezrealizowana</span>
+    {% else %}
+      <span class="badge badge-warning">zaplanowana</span>
+    {% endif %}
+  </div>
+
+  <div class="card-body">
+    <p><strong>Termin:</strong> {{ next_appointment['appointment_time'] }}</p>
+    <p><strong>Pacjent:</strong> {{ next_appointment['first_name'] }} {{ next_appointment['last_name'] }}</p>
+    <p class="text-muted">
+      PESEL: {{ next_appointment['pesel'] }}<br>
+      {{ next_appointment['patient_phone'] }} • {{ next_appointment['patient_email'] }}
+    </p>
+
+    {% if next_appointment['symptoms'] %}
+      <div class="mb-3">
+        <strong>Objawy:</strong><br>
+        {{ next_appointment['symptoms'] }}
+      </div>
+    {% endif %}
+
+    <div class="d-flex flex-wrap" style="gap:10px;">
+      <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=next_appointment['id']) }}">
+        <input type="hidden" name="status" value="done">
+        <input type="hidden" name="date" value="{{ selected_date or next_appointment['appointment_time'][:10] }}">
+        <button class="btn btn-success btn-sm">
+          <i class="fas fa-check"></i> Zrealizowana
+        </button>
+      </form>
+
+      <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=next_appointment['id']) }}">
+        <input type="hidden" name="status" value="no_show">
+        <input type="hidden" name="date" value="{{ selected_date or next_appointment['appointment_time'][:10] }}">
+        <button class="btn btn-danger btn-sm">
+          <i class="fas fa-times"></i> Niezrealizowana
+        </button>
+      </form>
+
+      <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=next_appointment['id']) }}">
+        <input type="hidden" name="status" value="scheduled">
+        <input type="hidden" name="date" value="{{ selected_date or next_appointment['appointment_time'][:10] }}">
+        <button class="btn btn-secondary btn-sm">Cofnij</button>
+      </form>
+    </div>
+
+    <small class="form-text text-muted mt-3">
+      Statystyki liczone są dla wybranej daty (lub dzisiejszej, jeśli brak filtra).
+    </small>
+  </div>
+</div>
+{% endif %}
+
+{# ===================== FILTR DATY ===================== #}
+<div class="card shadow mb-4">
+  <div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary">Filtruj wizyty</h6>
+    {% if selected_date %}
+      <span class="badge badge-info">{{ selected_date }}</span>
+    {% else %}
+      <span class="badge badge-secondary">wszystkie daty</span>
+    {% endif %}
+  </div>
+
+  <div class="card-body">
+    <form method="get" class="form-inline" style="gap:10px;">
+      <label for="dateFilter" class="mr-2 mb-0">Data:</label>
+      <input type="date" id="dateFilter" name="date" class="form-control" value="{{ selected_date or '' }}">
+      <button class="btn btn-primary">
+        <i class="fas fa-filter"></i> Filtruj
+      </button>
+      {% if selected_date %}
+        <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-outline-secondary">Wyczyść</a>
+      {% endif %}
+    </form>
+    <small class="form-text text-muted mt-2">
+      Statystyki liczone są dla wybranej daty (lub dzisiejszej, jeśli brak filtra).
+    </small>
+  </div>
+</div>
+
+{# ===================== TABS ===================== #}
+<ul class="nav nav-tabs mb-3" id="appointmentsTabs" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab">
+      Przyszłe ({{ upcoming_appointments|length }})
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="past-tab" data-toggle="tab" href="#past" role="tab">
+      Przeszłe ({{ past_appointments|length }})
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="stats-tab" data-toggle="tab" href="#stats" role="tab">
+      Statystyki
+    </a>
+  </li>
+</ul>
+
+<div class="tab-content">
+
+  {# ===================== PRZYSZŁE ===================== #}
+  <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+    {% if upcoming_appointments %}
+      {% for a in upcoming_appointments %}
+        <div class="card shadow mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:10px;">
+              <div>
+                <strong>{{ a['appointment_time'] }}</strong><br>
+                {{ a['first_name'] }} {{ a['last_name'] }}
+
+                <div class="mt-2">
+                  {% if a['status'] == 'done' %}
+                    <span class="badge badge-success">zrealizowana</span>
+                  {% elif a['status'] == 'no_show' %}
+                    <span class="badge badge-danger">niezrealizowana</span>
+                  {% else %}
+                    <span class="badge badge-warning">zaplanowana</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap" style="gap:8px;">
+                <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=a['id']) }}">
+                  <input type="hidden" name="status" value="done">
+                  <input type="hidden" name="date" value="{{ selected_date or a['appointment_time'][:10] }}">
+                  <button class="btn btn-success btn-sm" title="Zrealizowana">
+                    <i class="fas fa-check"></i>
+                  </button>
+                </form>
+
+                <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=a['id']) }}">
+                  <input type="hidden" name="status" value="no_show">
+                  <input type="hidden" name="date" value="{{ selected_date or a['appointment_time'][:10] }}">
+                  <button class="btn btn-danger btn-sm" title="Niezrealizowana">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </form>
+
+                <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=a['id']) }}">
+                  <input type="hidden" name="status" value="scheduled">
+                  <input type="hidden" name="date" value="{{ selected_date or a['appointment_time'][:10] }}">
+                  <button class="btn btn-secondary btn-sm" title="Cofnij na zaplanowana">
+                    Cofnij
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {% if a['symptoms'] %}
+              <div class="mt-2 text-muted">
+                <small><strong>Objawy:</strong> {{ a['symptoms'] }}</small>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-info">Brak przyszłych wizyt.</div>
+    {% endif %}
+  </div>
+
+  {# ===================== PRZESZŁE (ARCHIWUM) ===================== #}
+  <div class="tab-pane fade" id="past" role="tabpanel">
+    {% if past_appointments %}
+      {% for a in past_appointments %}
+        <div class="card shadow mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:10px;">
+              <div>
+                <strong>{{ a['appointment_time'] }}</strong><br>
+                {{ a['first_name'] }} {{ a['last_name'] }}
+
+                <div class="mt-2">
+                  {% if a['status'] == 'done' %}
+                    <span class="badge badge-success">zrealizowana</span>
+                  {% elif a['status'] == 'no_show' %}
+                    <span class="badge badge-danger">niezrealizowana</span>
+                  {% else %}
+                    <span class="badge badge-secondary">zaplanowana</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap" style="gap:8px;">
+                <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=a['id']) }}">
+                  <input type="hidden" name="status" value="done">
+                  <input type="hidden" name="date" value="{{ selected_date or a['appointment_time'][:10] }}">
+                  <button class="btn btn-success btn-sm" title="Zrealizowana">
+                    <i class="fas fa-check"></i>
+                  </button>
+                </form>
+
+                <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=a['id']) }}">
+                  <input type="hidden" name="status" value="no_show">
+                  <input type="hidden" name="date" value="{{ selected_date or a['appointment_time'][:10] }}">
+                  <button class="btn btn-danger btn-sm" title="Niezrealizowana">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </form>
+
+                <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=a['id']) }}">
+                  <input type="hidden" name="status" value="scheduled">
+                  <input type="hidden" name="date" value="{{ selected_date or a['appointment_time'][:10] }}">
+                  <button class="btn btn-secondary btn-sm" title="Cofnij na zaplanowana">
+                    Cofnij
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {% if a['symptoms'] %}
+              <div class="mt-2 text-muted">
+                <small><strong>Objawy:</strong> {{ a['symptoms'] }}</small>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-secondary">Brak przeszłych wizyt.</div>
+    {% endif %}
+  </div>
+
+  {# ===================== STATYSTYKI ===================== #}
+  <div class="tab-pane fade" id="stats" role="tabpanel">
+    <div class="alert alert-light border">
+      <strong>Okres statystyk:</strong> {{ anchor_date }}
+      <span class="text-muted">(dzień = wybrana data lub dzisiaj)</span>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <div class="card shadow h-100 border-left-primary">
+          <div class="card-body">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Dzień</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats_day.total }}</div>
+            <div class="mt-2">
+              <span class="badge badge-warning">zaplan.: {{ stats_day.scheduled }}</span>
+              <span class="badge badge-success">zrealiz.: {{ stats_day.done }}</span>
+              <span class="badge badge-danger">niezrealiz.: {{ stats_day.no_show }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <div class="card shadow h-100 border-left-info">
+          <div class="card-body">
+            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tydzień</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats_week.total }}</div>
+            <div class="mt-2">
+              <span class="badge badge-warning">zaplan.: {{ stats_week.scheduled }}</span>
+              <span class="badge badge-success">zrealiz.: {{ stats_week.done }}</span>
+              <span class="badge badge-danger">niezrealiz.: {{ stats_week.no_show }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <div class="card shadow h-100 border-left-success">
+          <div class="card-body">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Miesiąc</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats_month.total }}</div>
+            <div class="mt-2">
+              <span class="badge badge-warning">zaplan.: {{ stats_month.scheduled }}</span>
+              <span class="badge badge-success">zrealiz.: {{ stats_month.done }}</span>
+              <span class="badge badge-danger">niezrealiz.: {{ stats_month.no_show }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+
+      <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Wizyty — ostatnie 7 dni</h6>
+          </div>
+          <div class="card-body">
+            {# Kontener z wymuszoną wysokością dla większego wykresu #}
+            <div class="chart-area" style="position: relative; height: 320px; width: 100%;">
+              <canvas id="chartDaily"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Rok — zrealizowane vs niezrealizowane (12 miesięcy)</h6>
+          </div>
+          <div class="card-body">
+            {# Kontener z wymuszoną wysokością dla większego wykresu #}
+            <div class="chart-area" style="position: relative; height: 320px; width: 100%;">
+              <canvas id="chartYear"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // auto-submit filtra daty
+  const df = document.getElementById("dateFilter");
+  if (df) df.addEventListener("change", () => df.form.submit());
+</script>
+
+<script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js') }}"></script>
+
+<script>
+  // ==============================
+  // DANE Z BACKENDU (JSON)
+  // ==============================
+  const dailyLabels = {{ daily_labels_json | default("[]") | safe }};
+  const dailyValues = {{ daily_values_json | default("[]") | safe }};
+
+  const yearLabelsRaw = {{ year_labels_json | default("[]") | safe }};
+  const yearDoneValues = {{ year_done_values_json | default("[]") | safe }};
+  const yearNoShowValues = {{ year_noshow_values_json | default("[]") | safe }};
+
+  // ==============================
+  // Etykiety miesięcy PL
+  // ==============================
+  const monthNamesPL = ["Sty","Lut","Mar","Kwi","Maj","Cze","Lip","Sie","Wrz","Paź","Lis","Gru"];
+  function ymToPl(ym) {
+    const parts = (ym || "").split("-");
+    if (parts.length !== 2) return ym;
+    const y = parts[0];
+    const m = parseInt(parts[1], 10);
+    if (!m || m < 1 || m > 12) return ym;
+    return monthNamesPL[m - 1] + " " + y;
+  }
+
+  const yearLabels = (yearLabelsRaw || []).map(ymToPl);
+
+  // ==============================
+  // Stylizacja (Kolory Bootstrap) i Opcje Wykresów
+  // ==============================
+  const colorPrimary = "#4e73df";
+  const colorSuccess = "#1cc88a";
+  const colorDanger  = "#e74a3b";
+  const colorGray    = "#858796";
+
+  const commonOptions = {
+    maintainAspectRatio: false,
+    layout: {
+      padding: { left: 10, right: 25, top: 25, bottom: 0 }
+    },
+    legend: {
+      display: true,
+      position: 'bottom',
+      labels: {
+        usePointStyle: true,
+        padding: 20,
+        fontColor: colorGray
+      }
+    },
+    scales: {
+      xAxes: [{
+        gridLines: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          fontColor: colorGray
+        }
+      }],
+      yAxes: [{
+        ticks: {
+          fontColor: colorGray,
+          padding: 10,
+          beginAtZero: true,
+          precision: 0 // tylko liczby całkowite
+        },
+        gridLines: {
+          color: "rgb(234, 236, 244)",
+          zeroLineColor: "rgb(234, 236, 244)",
+          drawBorder: false,
+          borderDash: [2],
+          zeroLineBorderDash: [2],
+          display: false // BRAK SIATKI
+        }
+      }]
+    },
+    tooltips: {
+      backgroundColor: "rgb(255,255,255)",
+      bodyFontColor: "#858796",
+      titleMarginBottom: 10,
+      titleFontColor: '#6e707e',
+      titleFontSize: 14,
+      borderColor: '#dddfeb',
+      borderWidth: 1,
+      xPadding: 15,
+      yPadding: 15,
+      displayColors: false,
+      intersect: false,
+      mode: 'index',
+      caretPadding: 10
+    }
+  };
+
+  // ==============================
+  // Inicjalizacja Wykresów
+  // ==============================
+  let dailyChart = null;
+  let yearChart = null;
+
+  function isCanvasVisible(canvas) {
+    if (!canvas) return false;
+    const rect = canvas.getBoundingClientRect();
+    return rect.width > 0;
+  }
+
+  // --- Wykres Dzienny (Liniowy) ---
+  function initDailyChart() {
+    if (dailyChart) return;
+    const canvas = document.getElementById("chartDaily");
+    if (!canvas) return;
+
+    if (!isCanvasVisible(canvas)) {
+      setTimeout(initDailyChart, 150);
+      return;
+    }
+    if (!dailyLabels.length) return;
+
+    dailyChart = new Chart(canvas, {
+      type: "line",
+      data: {
+        labels: dailyLabels,
+        datasets: [{
+          label: "Wizyty",
+          data: dailyValues || [],
+          lineTension: 0.3,
+          backgroundColor: "rgba(78, 115, 223, 0.05)",
+          borderColor: colorPrimary,
+          pointRadius: 3,
+          pointBackgroundColor: colorPrimary,
+          pointBorderColor: colorPrimary,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: colorPrimary,
+          pointHoverBorderColor: colorPrimary,
+          pointHitRadius: 10,
+          pointBorderWidth: 2,
+          fill: true
+        }]
+      },
+      options: commonOptions
+    });
+  }
+
+  // --- Wykres Roczny (Słupkowy) ---
+  function initYearChart() {
+    if (yearChart) return;
+    const canvas = document.getElementById("chartYear");
+    if (!canvas) return;
+
+    if (!isCanvasVisible(canvas)) {
+      setTimeout(initYearChart, 150);
+      return;
+    }
+    if (!yearLabels.length) return;
+
+    yearChart = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: yearLabels,
+        datasets: [
+          {
+            label: "Zrealizowane",
+            backgroundColor: colorSuccess,
+            hoverBackgroundColor: "#17a673",
+            borderColor: "#17a673",
+            data: yearDoneValues || [],
+            barPercentage: 0.6,
+            categoryPercentage: 0.8
+          },
+          {
+            label: "Niezrealizowane",
+            backgroundColor: colorDanger,
+            hoverBackgroundColor: "#c2362a",
+            borderColor: "#c2362a",
+            data: yearNoShowValues || [],
+            barPercentage: 0.6,
+            categoryPercentage: 0.8
+          }
+        ]
+      },
+      options: {
+        ...commonOptions,
+        scales: {
+            xAxes: [{
+                gridLines: { display: false, drawBorder: false },
+                stacked: false
+            }],
+            yAxes: [{
+                gridLines: { display: false, drawBorder: false },
+                ticks: { beginAtZero: true, precision: 0 },
+                stacked: false
+            }]
+        }
+      }
+    });
+  }
+
+  function initStatsCharts() {
+    initDailyChart();
+    initYearChart();
+    if (dailyChart) dailyChart.resize();
+    if (yearChart) yearChart.resize();
+  }
+
+  // Trigger po kliknięciu taba
+  if (window.jQuery) {
+    $('#stats-tab').on('shown.bs.tab', function () {
+      initStatsCharts();
+    });
+  } else {
+    const statsTab = document.getElementById("stats-tab");
+    if (statsTab) {
+      statsTab.addEventListener("click", function () {
+        setTimeout(initStatsCharts, 200);
+      });
+    }
+  }
+</script>
+{% endblock %}

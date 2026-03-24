@@ -1,0 +1,87 @@
+/*
+   GLOBALNE POPRAWKI CZYTELNOŚCI
+   */
+
+/* Linki */
+a {
+  text-decoration: none;
+}
+
+/*
+   PRZYCISKI – NAJWAŻNIEJSZE
+   */
+
+/* Główny przycisk (Zaloguj, Zapisz, Wyślij) */
+.btn-primary {
+  background-color: #0d6efd !important;   /* medyczny niebieski */
+  border-color: #0d6efd !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #0b5ed7 !important;
+  border-color: #0b5ed7 !important;
+}
+
+/* Akcje pozytywne (Załóż konto, Eksport) */
+.btn-success {
+  background-color: #198754 !important;   /* zielony */
+  border-color: #198754 !important;
+  color: #ffffff !important;
+}
+
+.btn-success:hover {
+  background-color: #157347 !important;
+}
+
+/* Akcje niebezpieczne (Usuń, Wyloguj) */
+.btn-danger {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #ffffff !important;
+}
+
+/*
+   LINKI JAK PRZYCISKI (SIDEBAR)
+   */
+
+.btn-link {
+  color: #ffffff !important;
+}
+
+/*
+   FORMULARZE
+   */
+
+.form-control {
+  border-radius: 0.35rem;
+}
+
+/*
+   KARTY
+   */
+
+.card {
+  border-radius: 0.5rem;
+}
+
+/*
+   BADGE (STATUSY)
+   */
+
+.badge {
+  padding: 0.45em 0.7em;
+  font-size: 0.85em;
+}
+/* Naprawa: gdy ktoś dał tylko class="btn" bez btn-primary itp. */
+.btn:not(.btn-link):not(.btn-outline-primary):not(.btn-outline-success):not(.btn-outline-danger):not(.btn-outline-warning):not(.btn-outline-info) {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+  color: #ffffff !important;
+}
+
+.btn:not(.btn-link):hover {
+  background-color: #0b5ed7 !important;
+  border-color: #0b5ed7 !important;
+}

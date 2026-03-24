@@ -1,0 +1,24 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Strona Główna{% endblock %}
+
+{% block content %}
+
+
+
+
+{% if session.get('role') == 'patient' %}
+    <p>Zalogowany jako: {{ session.get('patient_name') }}</p>
+
+{% elif session.get('role') == 'doctor' %}
+    <p>Zalogowany jako lekarz: {{ session.get('doctor_name') }}</p>
+
+{% else %}
+    <h2>Witamy w naszej przychodni!</h2>
+  <p>Dbamy o Twoje zdrowie. Zarejestruj się na wizytę już dziś.</p>
+
+    <p>Jeżeli nie masz konta: </p>
+    <a href="{{ url_for('create_account') }}" class="btn">Załóż konto pacjenta</a>
+{% endif %}
+
+{% endblock %}

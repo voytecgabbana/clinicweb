@@ -1,0 +1,9 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Sukces{% endblock %}
+
+{% block content %}
+    <h2>Rejestracja zakończona sukcesem!</h2>
+    <p>Twoja wizyta została zarezerwowana.</p>
+    <a href="{{ url_for('index') }}" class="btn">Powrót do strony głównej</a>
+{% endblock %}

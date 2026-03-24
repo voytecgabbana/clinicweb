@@ -1,0 +1,54 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Załóż konto{% endblock %}
+
+{% block content %}
+  <h2>Załóż konto pacjenta</h2>
+
+  <div class="card">
+    <div class="card-header">
+      <p class="card-title">Dane pacjenta</p>
+      <span class="badge">Konto</span>
+    </div>
+
+    <div class="card-body">
+      <form method="post" action="{{ url_for('create_account') }}">
+        <div class="form-group">
+          <label for="first_name">Imię</label>
+          <input type="text" id="first_name" name="first_name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="last_name">Nazwisko</label>
+          <input type="text" id="last_name" name="last_name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pesel">PESEL</label>
+          <input type="text" id="pesel" name="pesel" required>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Telefon</label>
+          <input type="text" id="phone" name="phone" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Hasło</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+
+        <button type="submit" class="btn">Załóż konto</button>
+      </form>
+    </div>
+  </div>
+
+  <p style="margin-top: 12px;">
+    Masz już konto? <a href="{{ url_for('login') }}">Zaloguj się</a>
+  </p>
+{% endblock %}

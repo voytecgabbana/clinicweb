@@ -1,0 +1,31 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Terminarz Lekarzy{% endblock %}
+
+{% block content %}
+    <h2>Terminarz Wizyt</h2>
+    <p>Poniżej znajduje się lista wszystkich zarezerwowanych wizyt.</p>
+    
+    {% if appointments %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Data i Godzina</th>
+                    <th>Doktor</th>
+                    <th>Specjalizacja</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in appointments %}
+                <tr>
+                    <td>{{ app['appointment_time'].replace('T', ' ') }}</td>
+                    <td>{{ app['doctor_name'] }}</td>
+                    <td>{{ app['specialization'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Brak zaplanowanych wizyt.</p>
+    {% endif %}
+{% endblock %}

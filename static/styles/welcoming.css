@@ -1,0 +1,170 @@
+/* 
+   1. USTAWIENIA GŁÓWNE (BODY)
+   */
+body {
+    /* Nadpisuje (resetuje) style z base.html, które zwężały stronę */
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    /* Ustawiamy tło gradientowe na cały ekran */
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    min-height: 100vh; /* 100% wysokości widoku */
+    
+    /* Ustawiam kolor tekstu na biały */
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Włączam Flexbox dla całego ciała strony, aby ułożyć:
+       GÓRA: Menu (Header)
+       DÓŁ:  Reszta treści (Main) */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 
+   2. DOSTOSOWANIE NAGŁÓWKA Z BASE.HTML
+    */
+header {
+    /* Dodaje trochę oddechu dla menu */
+    padding: 20px 40px;
+    width: 100%;
+    box-sizing: border-box; /* Żeby padding nie poszerzał strony poza 100% */
+}
+
+header h1 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+/* Zmieniam kolor linków w menu na biały, bo domyślny czarny (#333) z base.html
+   będzie niewidoczny na niebieskim tle. */
+nav {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important; /* Delikatna linia */
+    padding-bottom: 15px;
+}
+
+nav a {
+    color: rgba(255, 255, 255, 0.8) !important; /* Lekko przezroczysty biały */
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+nav a:hover {
+    color: #ffffff !important; /* Pełny biały po najechaniu */
+    text-shadow: 0 0 10px rgba(255,255,255, 0.5); /* Efekt świecenia */
+}
+
+/* 
+   3. CENTROWANIE TREŚCI (MAIN)
+   */
+main {
+    /* flex: 1 sprawia, że ten element zajmuje całą dostępną wolną przestrzeń
+       pomiędzy nagłówkiem a dołem ekranu */
+    flex: 1;
+
+    /* Flexbox do wycentrowania zawartości WEWNĄTRZ main */
+    display: flex;
+    flex-direction: column; /* Układamy elementy jeden pod drugim */
+    justify-content: center; /* Środek w pionie */
+    align-items: center;     /* Środek w poziomie */
+    text-align: center;      /* Centrowanie tekstu wewnątrz paragrafów */
+    
+    padding: 20px;
+}
+
+/* 
+   4. STYLIZACJA ELEMENTÓW POWITALNYCH
+    */
+h2 {
+    font-size: 3.5rem; /* Bardzo duży nagłówek */
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+p {
+    font-size: 1.3rem;
+    margin-bottom: 2.5rem;
+    max-width: 600px; /* Żeby tekst nie był za szeroki na dużych ekranach */
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+/* 
+   5. PRZYCISK (BTN) - NADPISANIE BASE.HTML
+    */
+.btn {
+    background-color: #ffffff !important;
+    color: #0072ff !important; /* Niebieski tekst */
+    font-weight: bold;
+    padding: 15px 40px !important;
+    font-size: 1.1rem !important;
+    border-radius: 50px !important; /* Pigułka */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15); /* Cień pod przyciskiem */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-3px); /* Lekkie uniesienie w górę */
+    box-shadow: 0 15px 25px rgba(0,0,0,0.25);
+}
+
+
+/* 
+   2. DOSTOSOWANIE NAGŁÓWKA Z BASE.HTML
+   */
+header {
+    /* Ustawiamy Flexbox, żeby łatwo wyśrodkować elementy */
+    display: flex;
+    flex-direction: column; /* Układ pionowy: Tytuł nad Menu */
+    align-items: center;    /* To centruje wszystko (Tytuł i Menu) w poziomie */
+    
+    padding: 20px 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+header h1 {
+    margin-top: 0;
+    font-size: 1.8rem; /* Nieco większy tytuł */
+    margin-bottom: 10px; /* Odstęp między tytułem a menu */
+    opacity: 0.95;
+    text-align: center;
+}
+
+/* Stylizacja kontenera linków */
+nav {
+    /* Flexbox dla samych linków */
+    display: flex;
+    justify-content: center; /* Wyśrodkowanie linków w rzędzie */
+    flex-wrap: wrap;         /* Żeby linki nie wychodziły poza ekran na komórkach */
+    gap: 20px;               /* Odstępy między linkami (nowocześniejsze niż margin) */
+    
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    padding-bottom: 15px;
+    width: 100%;             /* Linia pod menu na całą szerokość */
+    max-width: 800px;        /* Ograniczenie szerokości linii dla estetyki */
+}
+
+/* Stylizacja pojedynczych linków */
+nav a {
+    color: rgba(255, 255, 255, 0.8) !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    /* Resetuje margines z base.html, bo teraz używam 'gap' w kontenerze nav */
+    margin-right: 0 !important; /* jak masz ten !important to jest to nadpisanie ustawień z samego html */
+    padding: 5px 10px; /* Powiększam obszar kliknięcia */
+}
+
+nav a:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1); /* Delikatne tło po najechaniu */
+    border-radius: 5px;
+    text-shadow: 0 0 10px rgba(255,255,255, 0.5);
+}

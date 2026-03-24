@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>{% block title %}Wirtualna Przychodnia{% endblock %}</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}">
+  <!-- SB Admin 2 -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+  {% block head %}{% endblock %}
+</head>
+
+<body id="page-top">
+<div id="wrapper">
+
+  <!-- SIDEBAR -->
+  <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url_for('index') }}">
+      <div class="sidebar-brand-icon">
+        <i class="fas fa-hospital"></i>
+      </div>
+      <div class="sidebar-brand-text mx-3">Wirtualna Przychodnia</div>
+    </a>
+
+    <hr class="sidebar-divider my-0">
+
+    <!-- Zawsze widoczne -->
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('index') }}">
+        <i class="fas fa-fw fa-home"></i>
+        <span>Start</span>
+      </a>
+    </li>
+
+    <hr class="sidebar-divider">
+
+    <!-- GOŚĆ -->
+    {% if not session.get('role') %}
+      <div class="sidebar-heading">Konto</div>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('login') }}">
+          <i class="fas fa-fw fa-sign-in-alt"></i>
+          <span>Logowanie pacjenta</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('create_account') }}">
+          <i class="fas fa-fw fa-user-plus"></i>
+          <span>Załóż konto</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('doctor_login') }}">
+          <i class="fas fa-fw fa-user-md"></i>
+          <span>Logowanie lekarza</span>
+        </a>
+      </li>
+    {% endif %}
+
+    <!-- PACJENT -->
+    {% if session.get('role') == 'patient' %}
+      <div class="sidebar-heading">Pacjent</div>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('register') }}">
+          <i class="fas fa-fw fa-notes-medical"></i>
+          <span>Umów wizytę</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('my_appointments') }}">
+          <i class="fas fa-fw fa-list"></i>
+          <span>Moje wizyty</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <form action="{{ url_for('logout') }}" method="post" class="m-0">
+          <button type="submit" class="btn btn-link nav-link text-left w-100">
+            <i class="fas fa-fw fa-sign-out-alt"></i>
+            <span>Wyloguj</span>
+          </button>
+        </form>
+      </li>
+    {% endif %}
+
+    <!-- LEKARZ -->
+    {% if session.get('role') == 'doctor' %}
+      <div class="sidebar-heading">Lekarz</div>
+
+      <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('check_appointment') }}">
+            <i class="fas fa-fw fa-search"></i>
+            <span>Sprawdź wizytę</span>
+          </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('doctor_dashboard') }}">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Wszystkie wizyty</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('export_patients_xlsx') }}">
+          <i class="fas fa-fw fa-file-excel"></i>
+          <span>Eksport pacjentów</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <form action="{{ url_for('doctor_logout') }}" method="post" class="m-0">
+          <button type="submit" class="btn btn-link nav-link text-left w-100">
+            <i class="fas fa-fw fa-sign-out-alt"></i>
+            <span>Wyloguj</span>
+          </button>
+        </form>
+      </li>
+    {% endif %}
+
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler -->
+    <div class="text-center d-none d-md-inline">
+      <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+  </ul>
+  <!-- END SIDEBAR -->
+
+  <!-- CONTENT WRAPPER -->
+  <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content">
+
+      <!-- TOPBAR -->
+      <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+          <i class="fa fa-bars"></i>
+        </button>
+
+        <ul class="navbar-nav ml-auto">
+
+          <!-- USER DROPDOWN -->
+          <li class="nav-item dropdown no-arrow">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                {% if session.get('role') == 'doctor' %}
+                  {{ session.get('doctor_name', 'Lekarz') }}
+                {% elif session.get('role') == 'patient' %}
+                  {{ session.get('patient_name', 'Pacjent') }}
+                {% else %}
+                  Gość
+                {% endif %}
+              </span>
+              <i class="fas {% if session.get('role') == 'doctor' %}fa-user-md{% elif session.get('role') == 'patient' %}fa-user{% else %}fa-user-circle{% endif %} fa-lg text-gray-500"></i>
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+
+              {% if session.get('role') == 'patient' %}
+                <a class="dropdown-item" href="{{ url_for('my_appointments') }}">
+                  <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Moje wizyty
+                </a>
+                <div class="dropdown-divider"></div>
+                <form action="{{ url_for('logout') }}" method="post" class="px-3 py-2">
+                  <button type="submit" class="btn btn-danger btn-block">Wyloguj</button>
+                </form>
+
+              {% elif session.get('role') == 'doctor' %}
+                <a class="dropdown-item" href="{{ url_for('doctor_dashboard') }}">
+                  <i class="fas fa-tachometer-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Dashboard
+                </a>
+                <div class="dropdown-divider"></div>
+                <form action="{{ url_for('doctor_logout') }}" method="post" class="px-3 py-2">
+                  <button type="submit" class="btn btn-danger btn-block">Wyloguj</button>
+                </form>
+
+              {% else %}
+                <a class="dropdown-item" href="{{ url_for('login') }}">
+                  <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Logowanie pacjenta
+                </a>
+                <a class="dropdown-item" href="{{ url_for('doctor_login') }}">
+                  <i class="fas fa-user-md fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Logowanie lekarza
+                </a>
+              {% endif %}
+            </div>
+          </li>
+
+        </ul>
+      </nav>
+      <!-- END TOPBAR -->
+
+      <!-- PAGE CONTENT -->
+      <div class="container-fluid">
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              {% set bs = 'info' %}
+              {% if category == 'success' %}{% set bs='success' %}
+              {% elif category == 'error' %}{% set bs='danger' %}
+              {% elif category == 'warning' %}{% set bs='warning' %}
+              {% endif %}
+              <div class="alert alert-{{ bs }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </div>
+      <!-- END PAGE CONTENT -->
+
+    </div>
+
+    <footer class="sticky-footer bg-white">
+      <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+          <span>© Wirtualna Przychodnia</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top">
+  <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Scripts -->
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

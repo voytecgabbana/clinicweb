@@ -1,0 +1,171 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Rejestracja wizyty{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+
+<h1 class="h3 mb-4 text-gray-800">Rejestracja wizyty</h1>
+<p class="text-muted">Zapisujesz wizytę jako: <strong>{{ session.get('patient_name') }}</strong></p>
+
+<!-- ===================== KROK 1 ===================== -->
+<div class="card shadow mb-4">
+  <div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary">1) Wybierz lekarza i datę</h6>
+    <span class="badge badge-info">Krok 1</span>
+  </div>
+
+  <div class="card-body">
+    <form method="get" action="{{ url_for('register') }}" id="checkForm">
+
+      <div class="form-group">
+        <label for="doctor_get">Wybierz lekarza:</label>
+        <select name="doctor" id="doctor_get" class="form-control" required>
+          {% for doctor in doctors %}
+            <option value="{{ doctor['id'] }}"
+              {% if selected_doctor_id and doctor['id'] == selected_doctor_id %}selected{% endif %}>
+              {{ doctor['name'] }} - {{ doctor['specialization'] }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- hidden input z datą -->
+      <input type="hidden" name="appointment_date" id="appointment_date_get"
+             value="{{ selected_date or '' }}">
+
+      <div class="row">
+        <div class="col-md-6">
+          <label>Kalendarz:</label>
+          <div id="calendar"></div>
+          <small class="form-text text-muted mt-2">
+            Wizyty tylko w dni robocze (pon–pt).
+          </small>
+        </div>
+
+        <div class="col-md-6">
+          <div class="alert alert-light border">
+            <p class="mb-1">
+              <strong>Wybrana data:</strong>
+              <span id="chosenDateLabel">{{ selected_date or '-' }}</span>
+            </p>
+            <p class="mb-0">
+              <strong>Zajęte godziny:</strong><br>
+              <span id="takenPreview" class="text-muted">—</span>
+            </p>
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-3">
+            Sprawdź dostępność
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- ===================== KROK 2 ===================== -->
+<div class="card shadow mb-4">
+  <div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary">2) Zapisz wizytę</h6>
+    <span class="badge badge-info">Krok 2</span>
+  </div>
+
+  <div class="card-body">
+    {% if selected_doctor_id and selected_date %}
+
+      <form method="post">
+
+        <input type="hidden" name="doctor" value="{{ selected_doctor_id }}">
+        <input type="hidden" name="appointment_date" value="{{ selected_date }}">
+
+        <div class="form-group">
+          <label for="appointment_time">Godzina wizyty:</label>
+          <select name="appointment_time" id="appointment_time" class="form-control" required>
+            {% for t in time_slots %}
+              <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="symptoms">Objawy:</label>
+          <textarea name="symptoms" id="symptoms"
+                    class="form-control" rows="4"
+                    placeholder="Opisz krótko objawy..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input"
+                   id="remind_email" name="remind_email" value="1">
+            <label class="custom-control-label" for="remind_email">
+              Wyślij przypomnienie e-mail
+            </label>
+          </div>
+
+          <div class="custom-control custom-checkbox mt-2">
+            <input type="checkbox" class="custom-control-input"
+                   id="remind_sms" name="remind_sms" value="1">
+            <label class="custom-control-label" for="remind_sms">
+              Wyślij przypomnienie SMS
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">
+          Zarejestruj wizytę
+        </button>
+
+      </form>
+
+    {% else %}
+      <p class="text-muted"><em>Najpierw wybierz lekarza i datę w Kroku 1.</em></p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+  const doctorSelect = document.getElementById("doctor_get");
+  const dateHidden = document.getElementById("appointment_date_get");
+  const chosenDateLabel = document.getElementById("chosenDateLabel");
+  const takenPreview = document.getElementById("takenPreview");
+
+  async function loadTaken() {
+    if (!doctorSelect.value || !dateHidden.value) return;
+
+    const res = await fetch(`/api/doctor/${doctorSelect.value}/taken?date=${dateHidden.value}`);
+    if (!res.ok) return;
+
+    const data = await res.json();
+    takenPreview.textContent = data.times.length ? data.times.join(", ") : "Brak";
+  }
+
+  flatpickr("#calendar", {
+    inline: true,
+    dateFormat: "Y-m-d",
+    defaultDate: dateHidden.value || null,
+    disable: [
+      function(date) {
+        return date.getDay() === 0 || date.getDay() === 6;
+      }
+    ],
+    onChange: function(selectedDates, dateStr) {
+      dateHidden.value = dateStr;
+      chosenDateLabel.textContent = dateStr;
+      loadTaken();
+    }
+  });
+
+  doctorSelect.addEventListener("change", loadTaken);
+</script>
+{% endblock %}

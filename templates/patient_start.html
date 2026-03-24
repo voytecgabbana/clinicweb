@@ -1,0 +1,51 @@
+{% extends "base_admin.html" %}
+{% block title %}Start{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Start – {{ session.get('patient_name') }}</h1>
+
+{% if next_appointment %}
+  <div class="card shadow mb-4 border-left-primary">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+      <h6 class="m-0 font-weight-bold text-primary">Twoja najbliższa wizyta</h6>
+
+      {% if next_appointment['status'] == 'done' %}
+        <span class="badge badge-success">zrealizowana</span>
+      {% elif next_appointment['status'] == 'no_show' %}
+        <span class="badge badge-danger">nieodbyta</span>
+      {% else %}
+        <span class="badge badge-warning">zaplanowana</span>
+      {% endif %}
+    </div>
+
+    <div class="card-body">
+      <p class="mb-1"><strong>Termin:</strong> {{ next_appointment['appointment_time'] }}</p>
+      <p class="mb-1"><strong>Lekarz:</strong> {{ next_appointment['doctor_name'] }}</p>
+      <p class="mb-3 text-muted"><strong>Specjalizacja:</strong> {{ next_appointment['specialization'] }}</p>
+
+      {% if next_appointment['symptoms'] %}
+        <div class="mb-3">
+          <strong>Twoje objawy:</strong><br>
+          {{ next_appointment['symptoms'] }}
+        </div>
+      {% endif %}
+
+      <div class="d-flex flex-wrap" style="gap:10px;">
+        <a class="btn btn-primary" href="{{ url_for('my_appointments') }}">
+          <i class="fas fa-list"></i> Moje wizyty
+        </a>
+
+        <a class="btn btn-success" href="{{ url_for('register') }}">
+          <i class="fas fa-notes-medical"></i> Umów nową wizytę
+        </a>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-info">
+    Nie masz żadnych nadchodzących wizyt.
+    <a href="{{ url_for('register') }}" class="alert-link">Umów wizytę</a>.
+  </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base_admin.html" %}
+{% block title %}Start{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Start – {{ session.get('doctor_name') }}</h1>
+
+{% if next_appointment %}
+  <div class="card shadow mb-4 border-left-primary">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+      <h6 class="m-0 font-weight-bold text-primary">Najbliższa wizyta</h6>
+
+      {% if next_appointment['status'] == 'done' %}
+        <span class="badge badge-success">zrealizowana</span>
+      {% elif next_appointment['status'] == 'no_show' %}
+        <span class="badge badge-danger">niezrealizowana</span>
+      {% else %}
+        <span class="badge badge-warning">zaplanowana</span>
+      {% endif %}
+    </div>
+
+    <div class="card-body">
+      <p class="mb-1"><strong>Termin:</strong> {{ next_appointment['appointment_time'] }}</p>
+      <p class="mb-1"><strong>Pacjent:</strong> {{ next_appointment['first_name'] }} {{ next_appointment['last_name'] }}</p>
+
+      <p class="mb-3 text-muted">
+        PESEL: {{ next_appointment['pesel'] }}<br>
+        {{ next_appointment['patient_phone'] }} • {{ next_appointment['patient_email'] }}
+      </p>
+
+      {% if next_appointment['symptoms'] %}
+        <div class="mb-3">
+          <strong>Objawy:</strong><br>
+          {{ next_appointment['symptoms'] }}
+        </div>
+      {% endif %}
+
+      <div class="d-flex flex-wrap" style="gap:10px;">
+        <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=next_appointment['id']) }}">
+          <input type="hidden" name="status" value="done">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-check"></i> Zrealizowana
+          </button>
+        </form>
+
+        <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=next_appointment['id']) }}">
+          <input type="hidden" name="status" value="no_show">
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-times"></i> Niezrealizowana
+          </button>
+        </form>
+
+        <form method="post" action="{{ url_for('doctor_set_appointment_status', appointment_id=next_appointment['id']) }}">
+          <input type="hidden" name="status" value="scheduled">
+          <button type="submit" class="btn btn-secondary">
+            Cofnij
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-info">Brak nadchodzących wizyt.</div>
+{% endif %}
+
+{% endblock %}

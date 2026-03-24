@@ -1,0 +1,80 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Moje wizyty{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4 text-gray-800">Moje wizyty</h1>
+
+<!-- ZAKŁADKI -->
+<ul class="nav nav-tabs mb-4" id="appointmentsTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link active" id="upcoming-tab" data-toggle="tab"
+       href="#upcoming" role="tab" aria-controls="upcoming" aria-selected="true">
+      <i class="fas fa-calendar-check"></i>
+      Przyszłe wizyty
+    </a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="past-tab" data-toggle="tab"
+       href="#past" role="tab" aria-controls="past" aria-selected="false">
+      <i class="fas fa-history"></i>
+      Przeszłe wizyty
+    </a>
+  </li>
+</ul>
+
+<!-- TREŚĆ ZAKŁADEK -->
+<div class="tab-content" id="appointmentsTabsContent">
+
+  <!-- PRZYSZŁE -->
+  <div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+
+    {% if upcoming_appointments %}
+      {% for a in upcoming_appointments %}
+        <div class="card shadow mb-3 border-left-success">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong>{{ a['appointment_time'] }}</strong><br>
+                {{ a['doctor_name'] }} – {{ a['specialization'] }}
+              </div>
+              <span class="badge badge-success align-self-start">
+                nadchodząca
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">Brak nadchodzących wizyt.</p>
+    {% endif %}
+
+  </div>
+
+  <!-- PRZESZŁE -->
+  <div class="tab-pane fade" id="past" role="tabpanel" aria-labelledby="past-tab">
+
+    {% if past_appointments %}
+      {% for a in past_appointments %}
+        <div class="card shadow mb-2 border-left-secondary">
+          <div class="card-body text-muted">
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong>{{ a['appointment_time'] }}</strong><br>
+                {{ a['doctor_name'] }} – {{ a['specialization'] }}
+              </div>
+              <span class="badge badge-secondary align-self-start">
+                zakończona
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">Brak wizyt archiwalnych.</p>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

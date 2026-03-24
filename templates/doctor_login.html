@@ -1,0 +1,33 @@
+{% extends 'base_admin.html' %}
+{% block title %}Logowanie lekarza{% endblock %}
+
+{% block content %}
+  <h2>Logowanie lekarza</h2>
+
+  <div class="card">
+    <div class="card-header">
+      <p class="card-title">Dostęp do panelu</p>
+      <span class="badge">Lekarz</span>
+    </div>
+
+    <div class="card-body">
+      <form method="post" action="{{ url_for('doctor_login') }}">
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" name="email" id="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Hasło</label>
+          <input type="password" name="password" id="password" required>
+        </div>
+
+        <button type="submit" class="btn">Zaloguj</button>
+      </form>
+    </div>
+  </div>
+
+  <p style="margin-top: 12px;">
+    <a href="{{ url_for('index') }}">Wróć na stronę główną</a>
+  </p>
+{% endblock %}

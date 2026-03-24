@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Lista pacjentów</title>
+</head>
+<body>
+  <h1>Lista zapisanych pacjentów</h1>
+
+  {% if appointments %}
+    <table border="1" cellpadding="6">
+      <tr>
+        <th>Pacjent</th>
+        <th>Email</th>
+        <th>Termin</th>
+        <th>Lekarz</th>
+        <th>Specjalizacja</th>
+        <th>Gabinet</th>
+        <th>Objawy</th>
+        <th>Przypomnienie</th>
+      </tr>
+
+      {% for a in appointments %}
+      <tr>
+        <td>{{ a['patient_name'] }}</td>
+        <td>{{ a['patient_email'] or '' }}</td>
+        <td>{{ a['appointment_time'] }}</td>
+        <td>{{ a['doctor_name'] }}</td>
+        <td>{{ a['specialization'] }}</td>
+        <td>{{ a['room_number'] }}</td>
+        <td>{{ a['symptoms'] or '' }}</td>
+        <td>{{ 'TAK' if a['remind_me'] else 'NIE' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>Brak zapisanych pacjentów.</p>
+  {% endif %}
+</body>
+</html>
